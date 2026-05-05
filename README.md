@@ -114,6 +114,39 @@ python eval_llm.py \
   --max_new_tokens 256
 ```
 
+
+### Windows PowerShell 启动方式
+
+如果在本地 Windows PowerShell 中运行，请使用项目自带的 Python 环境，并用反引号 `` ` `` 作为换行符。
+
+只加载预训练权重：
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight pretrain_full_4090_seq380_bs32_acc4 `
+  --max_new_tokens 256
+```
+
+加载全量 SFT 权重：
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight full_sft_4090_seq512_bs16_acc8 `
+  --max_new_tokens 256
+```
+
+加载全量 SFT + 医疗 LoRA：
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight full_sft_4090_seq512_bs16_acc8 `
+  --lora_weight lora_medical_from_full_sft `
+  --max_new_tokens 256
+```
+
 ## 评估思路
 
 建议使用同一组问题对三个阶段进行对比：

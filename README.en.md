@@ -114,6 +114,39 @@ python eval_llm.py \
   --max_new_tokens 256
 ```
 
+
+### Windows PowerShell Commands
+
+When running locally in Windows PowerShell, use the project Python environment and the backtick `` ` `` as the line continuation character.
+
+Pretrained model only:
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight pretrain_full_4090_seq380_bs32_acc4 `
+  --max_new_tokens 256
+```
+
+Full SFT:
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight full_sft_4090_seq512_bs16_acc8 `
+  --max_new_tokens 256
+```
+
+Full SFT + Medical LoRA:
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight full_sft_4090_seq512_bs16_acc8 `
+  --lora_weight lora_medical_from_full_sft `
+  --max_new_tokens 256
+```
+
 ## Evaluation
 
 Use the same prompt set to compare the three model stages:
