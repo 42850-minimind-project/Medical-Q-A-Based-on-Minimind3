@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.DS_Store
+.conda/
+.venv/
+out
+checkpoints/
+dataset/*.jsonl
+minimind-3/
+.idea/
+.modelscope_cache/
+.modelscope_credentials/
+tmp_*
+website/
+docs-minimind/
