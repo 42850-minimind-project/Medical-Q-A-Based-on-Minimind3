@@ -2,7 +2,7 @@
 
 [English](README.en.md) | 中文
 
-本项目基于 MiniMind3 训练链路，完成了一个面向医疗问答场景的小型语言模型实验。项目重点不是直接使用现成大模型做调用，而是复现并整理从预训练、全量监督微调到医疗 LoRA 适配的完整后训练流程。
+本项目基于 MiniMind3 训练链路，完成了一个面向医疗问答场景的小型语言模型实验。项目重点不是直接使用现成大模型做调用，而是复现并整理从预训练、全量监督微调、GRPO-RLAIF 到医疗 LoRA 适配的完整后训练流程。
 
 > 说明：本项目仅用于学习和实验展示，医疗回答不能替代医生诊断、处方或急救建议。
 
@@ -11,8 +11,9 @@
 - 基于 MiniMind3 代码结构完成小模型训练闭环。
 - 使用通用语料进行预训练，获得基础语言续写能力。
 - 使用 SFT 数据进行全量监督微调，获得基础指令跟随和对话能力。
-- 使用医疗问答 LoRA 数据集进行参数高效微调，观察领域适配效果。
-- 对比 `Pretrain`、`Full SFT`、`Full SFT + Medical LoRA` 三个阶段的回答差异。
+- 使用 GRPO-RLAIF 进行奖励模型反馈下的偏好优化。
+- 在 GRPO-RLAIF 权重基础上使用医疗问答 LoRA 数据集进行参数高效微调，观察领域适配效果。
+- 对比 `Pretrain`、`Full SFT`、`GRPO-RLAIF`、`GRPO-RLAIF + Medical LoRA` 四个阶段的回答差异。
 
 ## 模型结构
 
@@ -46,20 +47,30 @@ pretrain_full_4090_seq380_bs32_acc4_768.pth
 full_sft_4090_seq512_bs16_acc8_768.pth
 ```
 
-### 3. 医疗 LoRA 微调
+### 3. GRPO-RLAIF 偏好优化
 
-医疗 LoRA 阶段以 Full SFT 权重作为 base，仅训练 LoRA 增量参数，让模型更适配医疗问答语气、术语和回答结构。
+GRPO-RLAIF 阶段以 Full SFT 权重作为 base，让模型对同一问题生成多份回答，并通过奖励模型和规则奖励给回答打分，再使用 GRPO 更新模型，使回答更符合奖励模型偏好。
+
+本项目 GRPO-RLAIF 权重命名为：
+
+```text
+grpo_rlaif_from_full_sft_768.pth
+```
+
+### 4. 医疗 LoRA 微调
+
+医疗 LoRA 阶段以 GRPO-RLAIF 权重作为 base，仅训练 LoRA 增量参数，让模型更适配医疗问答语气、术语和回答结构。
 
 本项目医疗 LoRA 权重命名为：
 
 ```text
-lora_medical_from_full_sft_768.pth
+lora_medical_from_grpo_rlaif_768.pth
 ```
 
 加载医疗 LoRA 推理时需要同时加载：
 
 ```text
-Full SFT base + Medical LoRA
+GRPO-RLAIF base + Medical LoRA
 ```
 
 ## 数据集
@@ -104,13 +115,13 @@ python eval_llm.py \
   --max_new_tokens 256
 ```
 
-加载全量 SFT + 医疗 LoRA：
+加载 GRPO-RLAIF + 医疗 LoRA：
 
 ```bash
 python eval_llm.py \
   --load_from ./model \
-  --weight full_sft_4090_seq512_bs16_acc8 \
-  --lora_weight lora_medical_from_full_sft \
+  --weight grpo_rlaif_from_full_sft \
+  --lora_weight lora_medical_from_grpo_rlaif \
   --max_new_tokens 256
 ```
 
@@ -137,13 +148,13 @@ python eval_llm.py \
   --max_new_tokens 256
 ```
 
-加载全量 SFT + 医疗 LoRA：
+加载 GRPO-RLAIF + 医疗 LoRA：
 
 ```powershell
 .\.conda\python.exe eval_llm.py `
   --load_from .\model `
-  --weight full_sft_4090_seq512_bs16_acc8 `
-  --lora_weight lora_medical_from_full_sft `
+  --weight grpo_rlaif_from_full_sft `
+  --lora_weight lora_medical_from_grpo_rlaif `
   --max_new_tokens 256
 ```
 
@@ -154,7 +165,8 @@ python eval_llm.py \
 ```text
 Pretrain
 Full SFT
-Full SFT + Medical LoRA
+GRPO-RLAIF
+GRPO-RLAIF + Medical LoRA
 ```
 
 重点观察：
