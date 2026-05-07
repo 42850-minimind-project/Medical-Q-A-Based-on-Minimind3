@@ -115,6 +115,15 @@ python eval_llm.py \
   --max_new_tokens 256
 ```
 
+GRPO-RLAIF only:
+
+```bash
+python eval_llm.py \
+  --load_from ./model \
+  --weight grpo_rlaif_from_full_sft \
+  --max_new_tokens 256
+```
+
 GRPO-RLAIF + Medical LoRA:
 
 ```bash
@@ -145,6 +154,15 @@ Full SFT:
 .\.conda\python.exe eval_llm.py `
   --load_from .\model `
   --weight full_sft_4090_seq512_bs16_acc8 `
+  --max_new_tokens 256
+```
+
+GRPO-RLAIF only:
+
+```powershell
+.\.conda\python.exe eval_llm.py `
+  --load_from .\model `
+  --weight grpo_rlaif_from_full_sft `
   --max_new_tokens 256
 ```
 
